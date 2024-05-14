@@ -1,0 +1,69 @@
+metrics:
+- context: "dataguard_stats_transport_lag"
+  metricsdesc:
+    transport_lag_value: "Determine transport lag value"
+  labels: [source_dbid, source_db_unique_name, name]
+  request: "select source_dbid, source_db_unique_name, name, 
+    (CAST(SUBSTRING(value, 5, 2) AS INT) * 3600000) + 
+    (CAST(SUBSTRING(value, 8, 2) AS INT) * 60000) + 
+    (CAST(SUBSTRING(value, 11, 2) AS INT) * 1000) AS transport_lag_value
+    from v$dataguard_stats
+    where name='transport lag'"
+
+
+- context: "dataguard_stats_apply_lag" 
+  metricsdesc:
+    apply_lag_value: "Determine apply lag value"
+  labels: [source_dbid, source_db_unique_name, name]
+  request: "select source_dbid, source_db_unique_name, name, 
+    (CAST(SUBSTRING(value, 5, 2) AS INT) * 3600000) + 
+    (CAST(SUBSTRING(value, 8, 2) AS INT) * 60000) + 
+    (CAST(SUBSTRING(value, 11, 2) AS INT) * 1000) AS apply_lag_value
+    from v$dataguard_stats
+    where name='apply lag'"
+  
+
+- context: "is_datafile_header_error"
+  metricsdesc:
+    is_datafile_header_error: "if 1 datafile_header error, 0 Good health"
+  labels: [status, error]
+  request: "select status, ERROR,
+    case
+        when status = 'OFFLINE' or ERROR is not null then 1
+        else 0
+    end as is_datafile_header_error
+    from v$datafile_header"
+
+
+
+  
+- context: "is_media_recovery_process_work"
+  metricsdesc:
+    is_media_recovery_process_work: "if 1 media_recovery_process is running, 0 media_recovery_process is not running"
+  labels: [process, status]  
+  request: "select process, status
+    case
+        when process like 'MRP%' then 1
+        else 0
+    end as is is_media_recovery_process_work
+    from v$managed_standby"
+
+
+
+- context: "is_dataguard_error"
+  metricsdesc:
+    is_dataguard_error: "if 1 dataguard_error occured, 0 Good health"
+  labels: ["facility", "severity", "timestamp"]
+  request: "select facility, severity, timestamp
+    case
+        when severity in ('Error', 'Fatal') then 1
+        else 0
+    end as is_dataguard_error
+    from v$dataguard_status
+    where timestamp > (sysdate -1)"
+  
+  
+    
+  
+  
+
