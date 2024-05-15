@@ -22,12 +22,11 @@ metrics:
     from v$dataguard_stats
     where name='apply lag'"
   
-
+  
 - context: "is_datafile_header_error"
   metricsdesc:
     is_datafile_header_error: "if 1 datafile_header error, 0 Good health"
-  labels: [status, error]
-  request: "select status, ERROR,
+  request: "select
     case
         when status = 'OFFLINE' or ERROR is not null then 1
         else 0
@@ -35,13 +34,11 @@ metrics:
     from v$datafile_header"
 
 
-
-  
 - context: "is_media_recovery_process_work"
   metricsdesc:
     is_media_recovery_process_work: "if 1 media_recovery_process is running, 0 media_recovery_process is not running"
-  labels: [process, status]  
-  request: "select process, status
+  labels: ["status"]  
+  request: "select status
     case
         when process like 'MRP%' then 1
         else 0
@@ -53,8 +50,8 @@ metrics:
 - context: "is_dataguard_error"
   metricsdesc:
     is_dataguard_error: "if 1 dataguard_error occured, 0 Good health"
-  labels: ["facility", "severity", "timestamp"]
-  request: "select facility, severity, timestamp
+  labels: ["facility", "timestamp"]
+  request: "select facility, timestamp
     case
         when severity in ('Error', 'Fatal') then 1
         else 0
@@ -64,6 +61,4 @@ metrics:
   
   
     
-  
-  
 
